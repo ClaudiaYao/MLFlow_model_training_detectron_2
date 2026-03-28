@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+.vscode
+
+upload_secrets.py
+.DS_Store
+
+src/data
