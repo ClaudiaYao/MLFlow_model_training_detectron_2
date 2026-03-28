@@ -87,7 +87,7 @@ class TrainPipeline:
             "train_precision": precision,
             "train_recall": recall,
             }
-                        # Evaluation phase (if val_loader is provided)
+
             if val_loader:
                 val_loss, val_micro_f1, val_macro_f1, val_precision, val_recall = self.evaluate(val_loader)
                 metrics.update({
@@ -103,13 +103,7 @@ class TrainPipeline:
         images, labels = next(iter(train_loader))  # Get a batch of data
         input_example = images[:1]  # Use the first image as an example
         input_example_np = input_example.cpu().numpy()  # Convert to NumPy array
-        # Infer signature
-        # Use the first batch of images and labels to infer the input-output schema
         signature = infer_signature(input_example_np, labels[:1].cpu().numpy())
-
-        # Convert input_example to a format suitable for MLflow
-        
-        # input_example = mlflow.pyfunc._enforce_schema(input_example_np, signature.inputs)  # Enforce input schema
 
         # Create parameters dictionary
         parameters = {
@@ -168,19 +162,23 @@ class TrainPipeline:
         print(f"Test Loss: {avg_loss:.4f}, Micro F1: {micro_f1:.4f}, Macro F1: {macro_f1:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}")
         return avg_loss, micro_f1, macro_f1, precision, recall
   
+
     def generate_loss_trend_chart(self, train_losses: list, val_losses: list):
         """Generate evaluation chart data from evals_result."""
         try: 
             epochs = len(train_losses)
             x_axis = range(0, epochs)
 
+            print("train loss:", train_losses)
+            print("validation loss:", val_losses)
+            
             # Plot Average Loss for each epoch
             plt.figure(figsize=(8, 5))
             plt.plot(x_axis, train_losses, label='Train Loss')
             plt.plot(x_axis, val_losses, label='Validation Loss')
-            plt.xlabel('Boosting Round')
+            plt.xlabel('Epoch')
             plt.ylabel('Log Loss')
-            plt.title('Training and Validation Log Loss per Boosting Round')
+            plt.title('Training and Validation Log Loss')
             plt.legend()
             plt.grid(True)
             plt.tight_layout()

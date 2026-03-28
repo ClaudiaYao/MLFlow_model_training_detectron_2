@@ -15,14 +15,6 @@ def unnormalize(img_tensor):
     img = img.clamp(0, 1)
     return img
 
-# class Detectron2InferencePipeline(mlflow.pyfunc.PythonModel):
-#     def __init__(self, model):
-#         self.model = model  # Load the trained model
-#         self.preprocess = transform  # Use the same preprocessing as training
-#         self.label_columns = ["is_empty", "is_full", "is_scattered"]  # Multi-label columns
-#         self.idx_to_class = {0: "is_empty", 1: "is_full", 2: "is_scattered"}  # Index to label mapping
-#         self.THRESHOLD = 0.5
-#         self.batch_size = 8
 
 class Detectron2InferencePipeline:
 
@@ -73,25 +65,8 @@ class Detectron2InferencePipeline:
         print("pred_labels:", pred_labels)
         print("prob:", probs)
 
-        # Decide title color
-        # title_color = "black" if set(pred_labels) == set(true_labels) else "red"
-
-        # Get confidence for each predicted label
         pred_confidences = [probs[0][j].item() for j in range(len(self.label_columns)) if pred[0, j] == 1]
 
-        # Build title string
-        # if pred_labels:
-        #     pred_str = ", ".join([f"{l} ({c*100:.1f}%)" for l, c in zip(pred_labels, pred_confidences)])
-        # else:
-        #     pred_str = "None"
-
-        # true_str = ", ".join(true_labels) if true_labels else "None"
-
-        # plt.figure(figsize=(8, 8))  # 6x6 inches
-        # plt.imshow(image_open)
-        # plt.title(f"Prediction: {pred_str}\nGround Truth: {true_str}", fontsize=12, color=title_color)
-        # plt.axis("off")
-        # plt.show()
         return pred_labels, pred_confidences
 
 

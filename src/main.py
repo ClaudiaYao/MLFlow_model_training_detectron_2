@@ -18,7 +18,7 @@ train_loader, val_loader, label_names = generate_train_test_datasets()
 trainer = TrainPipeline()
 trained_model, parameters, metrics, signature, input_example, train_losses, val_losses = trainer.train(train_loader=train_loader,
                 val_loader=val_loader,
-                epochs=1)  # Use fewer epochs for testing
+                epochs=3)  # Use fewer epochs for testing
 print("✅ Model training test passed.")
 
 chart_saved_path = trainer.generate_loss_trend_chart(train_losses, val_losses)
@@ -29,7 +29,7 @@ log_register_model(trained_model, setting.model_name, "detectron2", metrics, par
 print("✅ Model registration test passed.")
 
 inference_pipeline = Detectron2InferencePipeline(trained_model)
-sample_image_path = setting.data_dir / "outdoor_garbage_dataset" / "img" / "5.jpg"
+sample_image_path = setting.data_dir / "img" / "5.jpg"
 predictions = inference_pipeline.predict(sample_image_path)
 assert predictions is not None, "Predictions should not be None."
 print("✅ Model inference test passed.")

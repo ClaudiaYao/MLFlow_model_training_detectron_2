@@ -1,11 +1,9 @@
 import mlflow
 from mlflow.exceptions import RestException
-from mlflow.exceptions import RestException
+import torch
 from src.config import setting
 from src import config 
 
-import torch
-import mlflow
         
 def log_register_model(
     model,
@@ -18,7 +16,7 @@ def log_register_model(
     input_example,
     register=True
 ):
-    """Log model .pth artifact to S3 via MLflow (no PyFunc)."""
+    """Log model .pth artifact to S3 via MLflow"""
 
     mlflow.set_tracking_uri(setting.mlflow_uri)
     client = mlflow.tracking.MlflowClient()
@@ -47,7 +45,7 @@ def log_register_model(
             mlflow.log_artifact(artifact_chart_path)
 
         # -------------------------------
-        # 🔑 Save model .pth temporarily
+        # 🔑 Save model .pth
         # -------------------------------
         local_model_path = config.PROJECT_ROOT / f"{model_name}.pth"
         torch.save(model.state_dict(), local_model_path)
@@ -62,7 +60,7 @@ def log_register_model(
         mlflow.log_dict({"input_example": input_example}, "input_example.json")
 
         # -------------------------------
-        # Optional: Registry entry only
+        # Optional: Registry model version
         # -------------------------------
         if register:
 
