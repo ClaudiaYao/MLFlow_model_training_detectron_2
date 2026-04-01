@@ -1,6 +1,6 @@
 # Introduction
 
-The repo contains a sample model training project which will upload model training result to MLFlow server.  
+The repo contains a sample model training project which will upload Detectron2 Classifier model training result to MLFlow server.  
 
 
 ## Steps to run the project:
