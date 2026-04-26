@@ -18,7 +18,7 @@ train_loader, val_loader, label_names = generate_train_test_datasets()
 trainer = TrainPipeline()
 trained_model, parameters, metrics, signature, input_example, train_losses, val_losses = trainer.train(train_loader=train_loader,
                 val_loader=val_loader,
-                epochs=3)  # Use fewer epochs for testing
+                epochs=8)  # Use fewer epochs for testing
 print("✅ Model training test passed.")
 
 chart_saved_path = trainer.generate_loss_trend_chart(train_losses, val_losses)
