@@ -14,6 +14,7 @@ def log_register_model(
     artifact_chart_path,
     signature,
     input_example,
+    input_example_gt_output,
     register=True
 ):
     """Log model .pth artifact to S3 via MLflow"""
@@ -58,6 +59,7 @@ def log_register_model(
         # Log model signature and input example
         mlflow.log_dict(signature.to_dict(), "model_signature.json")
         mlflow.log_dict({"input_example": input_example}, "input_example.json")
+        mlflow.log_dict({"input_example_gt_output": input_example_gt_output}, "input_example_gt_output.json")
 
         # -------------------------------
         # Optional: Registry model version

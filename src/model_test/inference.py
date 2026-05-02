@@ -5,6 +5,8 @@ from src.model_workflow.preprocess import transform
 from PIL import Image
 from src.model_workflow.preprocess import CSVImageDataset
 import os
+import base64
+import tempfile
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -103,22 +105,47 @@ class Detectron2InferencePipeline:
 
         return predictions, pred_confidences
     
+    # def predict(self, model_input):
+    # # Check if the input is a directory
+    #     image_full_path_names = []
+    #     if isinstance(model_input, str) and os.path.isdir(model_input):
+    #         # Get all image files in the directory
+    #         image_full_path_names = [
+    #             os.path.join(model_input, f)
+    #             for f in os.listdir(model_input)
+    #             if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+    #         ]
+    #     else:
+    #         image_full_path_names.append(model_input)
+
+    #     # If there are fewer images than the batch size, use a loop for single predictions
+    #     if len(image_full_path_names) < self.batch_size:
+    #         prediction_result = [self.predict_single(image_path) for image_path in image_full_path_names]
+    #         return prediction_result
+    #     else:
+    #         prediction_result = self.predict_batch(image_full_path_names)
+
     def predict(self, model_input):
-    # Check if the input is a directory
-        image_full_path_names = []
-        if isinstance(model_input, str) and os.path.isdir(model_input):
-            # Get all image files in the directory
+        inputs = model_input if isinstance(model_input, list) else [model_input]
+
+        print("Received inputs for prediction:", inputs)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+
+            # Decode and save each image to the temp folder
+            for i, item in enumerate(inputs):
+                image_bytes = base64.b64decode(item)
+                tmp_path = os.path.join(tmp_dir, f"image_{i}.jpg")
+                with open(tmp_path, "wb") as f:
+                    f.write(image_bytes)
+
+            # Collect all image paths from the temp folder (same as before)
             image_full_path_names = [
-                os.path.join(model_input, f)
-                for f in os.listdir(model_input)
+                os.path.join(tmp_dir, f)
+                for f in os.listdir(tmp_dir)
                 if f.lower().endswith(('.png', '.jpg', '.jpeg'))
             ]
-        else:
-            image_full_path_names.append(model_input)
 
-        # If there are fewer images than the batch size, use a loop for single predictions
-        if len(image_full_path_names) < self.batch_size:
-            prediction_result = [self.predict_single(image_path) for image_path in image_full_path_names]
-            return prediction_result
-        else:
-            prediction_result = self.predict_batch(image_full_path_names)
+            if len(image_full_path_names) < self.batch_size:
+                return [self.predict_single(path) for path in image_full_path_names]
+            else:
+                return self.predict_batch(image_full_path_names)
