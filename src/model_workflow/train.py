@@ -108,18 +108,6 @@ class TrainPipeline:
         input_example_np = input_example.cpu().numpy()  # Convert to NumPy array
         input_example_gt_output = labels[:1]  # Corresponding label for the input example
         signature = infer_signature(input_example_np, input_example_gt_output.cpu().numpy())
-
-        # For input_example (image)
-        buffer = io.BytesIO()
-        np.save(buffer, input_example_np)
-        buffer.seek(0)
-        input_example_base64 = base64.b64encode(buffer.read()).decode('utf-8')
-
-        # For input_example_gt_output (label)
-        buffer_label = io.BytesIO()
-        np.save(buffer_label, input_example_gt_output.cpu().numpy())
-        buffer_label.seek(0)
-        input_example_base64_gt_output = base64.b64encode(buffer_label.read()).decode('utf-8')
         
         # Create parameters dictionary
         parameters = {
@@ -133,7 +121,7 @@ class TrainPipeline:
             "learning_rate": 1e-3,
         }
 
-        return self.model, parameters, metrics, signature, input_example_base64, input_example_base64_gt_output, train_losses, val_losses
+        return self.model, parameters, metrics, signature, input_example, input_example_gt_output, train_losses, val_losses
 
 
 

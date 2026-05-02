@@ -15,9 +15,9 @@ import base64
 
 # test the whole training, logging, registering and inference workflow end to end. Note that the test is not designed for unit testing but more for integration testing, as the training and inference pipeline are closely connected and depend on each other. The test will train a model, log and register it, and then do the inference with the same trained model.
 
-train_loader, val_loader, label_names = generate_train_test_datasets()
+train_loader, val_loader, label_names, sample_image_paths, sampled_labels = generate_train_test_datasets()
 trainer = TrainPipeline()
-trained_model, parameters, metrics, signature, input_example, input_example_gt_output, train_losses, val_losses = trainer.train(train_loader=train_loader,
+trained_model, parameters, metrics, signature, _, _, train_losses, val_losses = trainer.train(train_loader=train_loader,
                 val_loader=val_loader,
                 epochs=8)  # Use fewer epochs for testing
 print("✅ Model training test passed.")
@@ -26,7 +26,15 @@ chart_saved_path = trainer.generate_loss_trend_chart(train_losses, val_losses)
 print("generated loss trend chart:", chart_saved_path)
 print("✅ Loss trend chart generation test passed.")
 
-log_register_model(trained_model, setting.model_name, "detectron2", metrics, parameters, chart_saved_path, signature, input_example, input_example_gt_output, register=True)
+input_base64_examples = []
+input_base64_examples_gt_output = []
+for sample_img_path, sample_label in zip(sample_image_paths, sampled_labels):
+    with open(sample_img_path, "rb") as image_file:
+        image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
+        input_base64_examples.append(image_base64)
+        input_base64_examples_gt_output.append(sample_label)
+
+log_register_model(trained_model, setting.model_name, "detectron2", metrics, parameters, chart_saved_path, signature, input_base64_examples, input_base64_examples_gt_output, label_names,register=True)
 print("✅ Model registration test passed.")
 
 inference_pipeline = Detectron2InferencePipeline(trained_model)
@@ -36,10 +44,13 @@ sample_image_path = setting.data_dir / "img" / "5.jpg"
 with open(sample_image_path, "rb") as image_file:
     image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
 
-predictions = inference_pipeline.predict(image_base64)
+# predictions = inference_pipeline.predict(image_base64)
+predictions = inference_pipeline.predict(input_base64_examples)
 assert predictions is not None, "Predictions should not be None."
 print("✅ Model inference test passed.")
 print("Predictions:", predictions)
+print("Label names:", label_names)
+print("sample gt labels:", input_base64_examples_gt_output)
 
 
 

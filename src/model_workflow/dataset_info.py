@@ -69,6 +69,10 @@ def generate_train_test_datasets():
         transform=transform
     )
 
+    sampled_df = train_df.sample(n=2, random_state=42)
+    sampled_image_paths = [setting.data_dir / "img" / img_name for img_name in sampled_df["image_path"]]
+    sampled_labels = sampled_df[label_names].values
+
     test_image_paths = [setting.data_dir / "img" / img_name for img_name in test_df["image_path"]]
     test_labels = test_df[label_names].values
     test_dataset = CSVImageDataset(
@@ -80,5 +84,4 @@ def generate_train_test_datasets():
     train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
     test_loader  = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
-    return train_loader, test_loader, label_names
-
+    return train_loader, test_loader, label_names, sampled_image_paths, sampled_labels
